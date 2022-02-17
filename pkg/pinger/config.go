@@ -2,7 +2,6 @@ package pinger
 
 import (
 	"context"
-	"flag"
 	"os"
 	"time"
 
@@ -81,22 +80,6 @@ func ParseFlags() (*Configuration, error) {
 		argServiceOvnControllerFilePidPath = pflag.String("service.ovncontroller.file.pid.path", "/var/run/ovn/ovn-controller.pid", "OVN controller daemon process id file.")
 	)
 
-	klogFlags := flag.NewFlagSet("klog", flag.ExitOnError)
-	klog.InitFlags(klogFlags)
-
-	// Sync the glog and klog flags.
-	flag.CommandLine.VisitAll(func(f1 *flag.Flag) {
-		f2 := klogFlags.Lookup(f1.Name)
-		if f2 != nil {
-			value := f1.Value.String()
-			if err := f2.Value.Set(value); err != nil {
-				klog.Fatalf("failed to set flag %v", err)
-			}
-		}
-	})
-
-	pflag.CommandLine.AddGoFlagSet(klogFlags)
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
 
 	config := &Configuration{

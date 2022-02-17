@@ -3,7 +3,6 @@ package speaker
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 	"time"
@@ -70,22 +69,6 @@ func ParseFlags() (*Configuration, error) {
 		argKubeConfigFile              = pflag.String("kubeconfig", "", "Path to kubeconfig file with authorization and master location information. If not set use the inCluster token.")
 	)
 
-	klogFlags := flag.NewFlagSet("klog", flag.ExitOnError)
-	klog.InitFlags(klogFlags)
-
-	// Sync the glog and klog flags.
-	flag.CommandLine.VisitAll(func(f1 *flag.Flag) {
-		f2 := klogFlags.Lookup(f1.Name)
-		if f2 != nil {
-			value := f1.Value.String()
-			if err := f2.Value.Set(value); err != nil {
-				klog.Fatalf("failed to set flag, %v", err)
-			}
-		}
-	})
-
-	pflag.CommandLine.AddGoFlagSet(klogFlags)
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
 
 	ht := argHoldTime.Seconds()

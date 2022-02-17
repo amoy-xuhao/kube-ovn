@@ -1688,7 +1688,7 @@ func (c *Controller) updatePolicyRouteForCentralizedSubnet(subnetName, cidr stri
 		return err
 	}
 
-	// It's hard to delete policy route when delete node, add map nodeName:nodeIP to external_ids to help process when delete node
+	// It's difficult to delete policy route when delete node, add map nodeName:nodeIP to external_ids to help process when delete node
 	if err := c.ovnClient.SetPolicyRouteExternalIds(util.CentralSubnetPriority, match, nameIpMap); err != nil {
 		klog.Errorf("failed to set policy route external_ids for subnet %s: %v", subnetName, err)
 		return err

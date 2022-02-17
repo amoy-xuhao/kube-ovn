@@ -3,10 +3,15 @@ package ovn_leader_checker
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
-	"github.com/spf13/pflag"
 	"io/ioutil"
+	"os"
+	exec "os/exec"
+	"strings"
+	"syscall"
+	"time"
+
+	"github.com/spf13/pflag"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -14,11 +19,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
-	"os"
-	exec "os/exec"
-	"strings"
-	"syscall"
-	"time"
 )
 
 const (
@@ -43,26 +43,6 @@ func ParseFlags() (*Configuration, error) {
 		argKubeConfigFile = pflag.String("kubeconfig", "", "Path to kubeconfig file with authorization and master location information. If not set use the inCluster token.")
 		argProbeInterval  = pflag.Int("probeInterval", DefaultProbeInterval, "interval of probing leader: ms unit")
 	)
-
-	klogFlags := flag.NewFlagSet("klog", flag.ContinueOnError)
-	klog.InitFlags(klogFlags)
-
-	// Sync the glog and klog flags.
-	flag.CommandLine.VisitAll(func(f1 *flag.Flag) {
-		f2 := klogFlags.Lookup(f1.Name)
-		if f2 != nil {
-			value := f1.Value.String()
-			if err := f2.Value.Set(value); err != nil {
-				klog.Errorf("failed to set flag %v", err)
-			}
-		}
-	})
-
-	// change the behavior of cmdline
-	// not exit. not good
-	pflag.CommandLine.Init(os.Args[0], pflag.ContinueOnError)
-	pflag.CommandLine.AddGoFlagSet(klogFlags)
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 
 	err := pflag.CommandLine.Parse(os.Args[1:])
 	if err != nil {
